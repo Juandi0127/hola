@@ -1,0 +1,134 @@
+body {
+    background: #fff; /* Fondo blanco */
+    font-family: 'Segoe UI', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.login-container {
+    max-width: 500px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    padding: 32px 24px;
+}
+
+.escudo {
+    width: 100px;
+    margin-bottom: 1em;
+}
+
+input[type="email"] {
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+}
+
+button {
+    background: #2980b9;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 0;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+button:hover {
+    background: #1c5980;
+}
+
+.error {
+    color: red;
+    margin-bottom: 1em;
+}
+
+.dashboard-container, .admin-container, .prestar-container {
+    background: #fff;
+    margin: 3em auto;
+    padding: 2em;
+    border-radius: 15px;
+    box-shadow: 0 0 15px #e0e0e0;
+    width: 90%;
+    max-width: 700px;
+}
+
+h2, h3 {
+    color: #1b5e20;
+    margin-bottom: 1em;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+}
+
+th, td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+}
+
+th {
+    background: #f4f6fa;
+    color: #2980b9;
+}
+
+tr:hover {
+    background: #f9f9f9;
+}
+
+.btn-prestar, button {
+    background: #43a047;
+    color: #fff;
+    border: none;
+    padding: 0.5em 1.5em;
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+.btn-prestar:hover, button:hover {
+    background: #b71c1c;
+}
+
+input[type="text"], input[type="number"] {
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+}
+
+a {
+    color: #2980b9;
+    text-decoration: none;
+    margin-right: 12px;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+li {
+    margin-bottom: 8px;
+}
+
+.flash-message {
+    background: #ffe0e0;
+    color: #c0392b;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    text-align: center;
+}

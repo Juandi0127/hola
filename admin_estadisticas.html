@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Estadísticas de la biblioteca</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="admin-container">
+        <div style="text-align:center;">
+            <img src="{{ url_for('static', filename='escudo.jpg') }}" alt="Escudo" style="width:60px; margin-bottom:10px;">
+            <h2>Estadísticas de la Biblioteca</h2>
+            <hr>
+        </div>
+        <div class="table-section">
+            <h3>Resumen general</h3>
+            <ul>
+                <li><strong>Total de préstamos realizados:</strong> {{ total_prestamos }}</li>
+                <li><strong>Total de libros en stock:</strong> {{ total_libros }}</li>
+            </ul>
+        </div>
+        <div class="table-section">
+            <h3>Libros más prestados</h3>
+            <table>
+                <tr>
+                    <th>Libro</th>
+                    <th>Veces prestado</th>
+                </tr>
+                {% for libro in libros_populares %}
+                <tr>
+                    <td>{{ libro['libro'] }}</td>
+                    <td>{{ libro['total'] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        <div class="table-section">
+            <h3>Usuarios más activos</h3>
+            <table>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Correo</th>
+                    <th>Préstamos realizados</th>
+                </tr>
+                {% for usuario in usuarios_activos %}
+                <tr>
+                    <td>{{ usuario['nombre'] }}</td>
+                    <td>{{ usuario['correo'] }}</td>
+                    <td>{{ usuario['total'] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        <div style="text-align:center; margin-top:20px;">
+            <a href="{{ url_for('admin_panel') }}"><button>Volver al panel</button></a>
+        </div>
+    </div>
+</body>
+</html>

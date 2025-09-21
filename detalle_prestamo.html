@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle del Préstamo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="detalle-prestamo-container">
+        <div style="text-align:center;">
+            <img src="{{ url_for('static', filename='escudo.jpg') }}" alt="Escudo" style="width:60px; margin-bottom:10px;">
+            <h2>Detalle del préstamo</h2>
+            <hr>
+        </div>
+        <ul>
+            <li><strong>Nombre:</strong> {{ prestamo['nombre'] }}</li>
+            <li><strong>Correo:</strong> {{ prestamo['correo'] }}</li>
+            <li><strong>Libro:</strong> {{ prestamo['libro'] }}</li>
+            <li><strong>Grado:</strong> {{ prestamo['grado'] }}</li>
+            <li><strong>Curso:</strong> {{ prestamo['curso'] }}</li>
+            <li><strong>Días restantes:</strong> {{ dias_restantes }}</li>
+        </ul>
+        <div style="text-align:center;">
+            <a href="{{ url_for('admin_prestamos') }}"><button>Volver a préstamos</button></a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Biblioteca - Stock</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div style="text-align:center;">
+            <img src="{{ url_for('static', filename='escudo.jpg') }}" alt="Escudo" style="width:60px; margin-bottom:10px;">
+            <h2>Bienvenido, {{ correo }}</h2>
+            <hr>
+        </div>
+        <h3>Stock de libros</h3>
+        <form method="POST">
+            <input type="text" name="search" placeholder="Buscar libro, autor o sección" value="{{ search }}">
+            <button type="submit">Buscar</button>
+        </form>
+        {% for seccion, libros in secciones.items() %}
+            <div class="table-section">
+                <h3>{{ seccion }}</h3>
+                <table>
+                    <tr>
+                        <th>Título</th>
+                        <th>Autor</th>
+                        <th>Stock</th>
+                        <th>Acción</th>
+                    </tr>
+                    {% for libro in libros %}
+                    <tr>
+                        <td>{{ libro['titulo'] }}</td>
+                        <td>{{ libro['autor'] }}</td>
+                        <td>{{ libro['stock'] }}</td>
+                        <td>
+                            <a href="{{ url_for('prestar', libro_id=libro['id']) }}"><button>Solicitar préstamo</button></a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        {% endfor %}
+        <div style="text-align:center; margin-top:20px;">
+            <a href="{{ url_for('logout') }}"><button>Cerrar sesión</button></a>
+        </div>
+    </div>
+    <div style="position: absolute; top: 20px; right: 30px;">
+        <a href="{{ url_for('perfil') }}">
+            <img src="{{ url_for('static', filename='escudo.jpg') }}" alt="Perfil" style="width:40px; border-radius:50%; box-shadow:0 2px 8px #ccc; cursor:pointer;">
+        </a>
+    </div>
+</body>
+</html>

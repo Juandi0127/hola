@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Acceso administrador</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="login-container">
+        <div style="text-align:center;">
+            <img src="{{ url_for('static', filename='escudo.jpg') }}" alt="Escudo" style="width:60px; margin-bottom:10px;">
+            <h2>Acceso administrador</h2>
+            <hr>
+        </div>
+        <form method="POST" style="display:flex; flex-direction:column; gap:12px;">
+            <input type="password" name="password" placeholder="Contraseña de administrador" required style="padding:10px; border-radius:6px; border:1px solid #ccc; font-size:16px;">
+            <button type="submit" style="margin-top:10px;">Entrar</button>
+        </form>
+        <div style="height:20px;"></div>
+        <div style="text-align:center;">
+            <a href="{{ url_for('login') }}">
+                <button style="width:100%;">Volver</button>
+            </a>
+        </div>
+        <div style="height:20px;"></div>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-message">
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+    </div>
+</body>
+</html>
