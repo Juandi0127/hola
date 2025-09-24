@@ -57,6 +57,40 @@
             font-weight: bold;
             margin-top: 0.5em;
         }
+        /* Style for the new search form */
+        .search-form-extended {
+            display: flex;
+            gap: 1em;
+            align-items: center;
+            margin-bottom: 1em;
+        }
+        .search-form-extended input[type='text'] {
+            flex-grow: 1; /* Allows the text input to take up available space */
+        }
+        .search-form-extended select {
+            padding: 0.6em 1em;
+            border: 1px solid #ccc;
+            border-radius: var(--border-radius);
+            background-color: #fff;
+            font-size: 1em;
+            color: #333;
+            cursor: pointer;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .search-form-extended select:hover {
+            border-color: #888;
+        }
+
+        .search-form-extended select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+        .search-form-extended button,
+        .search-form-extended .btn-secondary {
+            flex-shrink: 0; /* Prevents these elements from shrinking */
+        }
     </style>
 </head>
 <body>
@@ -72,21 +106,28 @@
             </div>
         </header>
 
-        <form method="GET" action="{{ url_for('dashboard') }}" class="search-form">
-            <input type="text" name="search" placeholder="Buscar por título, autor, sección o editorial..." value="{{ search }}">
-            <button type="submit">Buscar</button>
+        <form method="GET" action="{{ url_for('dashboard') }}" class="search-form-extended">
+            <input type="text" name="search" placeholder="Buscar por título, autor o código..." value="{{ search }}">
+            <select name="seccion">
+                <option value="">Todas las Secciones</option>
+                {% for seccion in secciones_disponibles %}
+                <option value="{{ seccion }}" {% if seccion == seccion_actual %}selected{% endif %}>{{ seccion }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn">Buscar</button>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Limpiar</a>
         </form>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                    <div class="flash-message flash-{{ category or 'success' }}">{{ message }}</div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
 
-        <!-- Recommendations Section -->
-        {% if not search %}
+        <!-- Recommendations Section (only show on default view) -->
+        {% if not search and not seccion_actual %}
         <div class="recommendations-grid">
             {% if libros_populares %}
             <div class="recommendation-section">
@@ -120,14 +161,15 @@
         </div>
         {% endif %}
 
-        <!-- Book Listings by Section -->
-        {% if secciones %}
-            {% for seccion, libros in secciones.items() %}
+        <!-- Book Listings -->
+        {% if secciones_agrupadas %}
+            {% for seccion, libros in secciones_agrupadas.items() %}
                 <div class="table-section">
                     <h3>{{ seccion }}</h3>
                     <table>
                         <thead>
                             <tr>
+                                <th>Código</th>
                                 <th>Título</th>
                                 <th>Autor</th>
                                 <th>Editorial</th>
@@ -138,6 +180,7 @@
                         <tbody>
                             {% for libro in libros %}
                             <tr>
+                                <td>{{ libro['codigo_libro'] }}</td>
                                 <td><a href="{{ url_for('libro_detalle', libro_id=libro.id) }}" class="book-title-link">{{ libro['titulo'] }}</a></td>
                                 <td>{{ libro['autor'] }}</td>
                                 <td>{{ libro['editorial'] }}</td>
@@ -153,7 +196,8 @@
             {% endfor %}
         {% else %}
              <div class="table-section">
-                <p>No hay libros disponibles que coincidan con tu búsqueda. Prueba con otros términos.</p>
+                <h3>Sin Resultados</h3>
+                <p>No hay libros disponibles que coincidan con tus filtros. Prueba a limpiar la búsqueda.</p>
             </div>
         {% endif %}
     </div>

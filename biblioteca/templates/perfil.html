@@ -31,18 +31,20 @@
             <table>
                 <thead>
                     <tr>
+                        <th>Código Libro</th>
                         <th>Libro</th>
                         <th>Fecha de Préstamo</th>
-                        <th>Fecha de Devolución</th>
+                        <th>Fecha Estimada de Devolución</th>
                         <th>Días Restantes</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for prestamo in prestamos %}
                     <tr class="{% if prestamo.dias_restantes <= 0 %}overdue{% endif %}">
+                        <td>{{ prestamo['codigo_libro'] }}</td>
                         <td>{{ prestamo['libro'] }}</td>
                         <td>{{ prestamo['fecha_prestamo'] }}</td>
-                        <td>{{ prestamo['fecha_devolucion'] }}</td>
+                        <td>{{ prestamo['fecha_devolucion_estimada'] }}</td>
                         <td>
                             {% if prestamo.dias_restantes > 0 %}
                                 {{ prestamo.dias_restantes }} día(s)
@@ -53,7 +55,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="4">No tienes libros prestados actualmente.</td>
+                        <td colspan="5">No tienes libros prestados actualmente.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -65,8 +67,10 @@
             <table>
                 <thead>
                     <tr>
+                        <th>Código Libro</th>
                         <th>Libro</th>
                         <th>Fecha de Préstamo</th>
+                        <th>Fecha de Devolución</th>
                         <th>Estado</th>
                         <th>Acción</th>
                     </tr>
@@ -74,8 +78,10 @@
                 <tbody>
                     {% for p in historial %}
                     <tr>
+                        <td>{{ p['codigo_libro'] }}</td>
                         <td>{{ p['libro'] }}</td>
                         <td>{{ p['fecha_prestamo'] }}</td>
+                        <td>{{ p['fecha_devolucion'] if p['fecha_devolucion'] else '' }}</td>
                         <td>
                             {% if p.devuelto %}
                                 <span style="color: var(--success-color);">Devuelto</span>
@@ -93,7 +99,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="4">No tienes historial de préstamos.</td>
+                        <td colspan="6">No tienes historial de préstamos.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

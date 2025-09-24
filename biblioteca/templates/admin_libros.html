@@ -61,6 +61,7 @@
                 <table>
                     <thead>
                         <tr>
+                            <th>Código</th>
                             <th>Título</th>
                             <th>Autor</th>
                             <th>Editorial</th>
@@ -72,6 +73,7 @@
                     <tbody>
                         {% for libro in libros %}
                         <tr>
+                            <td>{{ libro['codigo_libro'] }}</td>
                             <td>{{ libro['titulo'] }}</td>
                             <td>{{ libro['autor'] }}</td>
                             <td>{{ libro['editorial'] }}</td>
@@ -86,7 +88,7 @@
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="6">No hay libros registrados.</td>
+                            <td colspan="7">No hay libros registrados.</td>
                         </tr>
                         {% endfor %}
                     </tbody>

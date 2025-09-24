@@ -12,32 +12,36 @@
             <h2>Historial de Préstamos</h2>
             <hr>
         </div>
-        <form method="POST" style="text-align:center; margin-bottom:20px;">
-            <input type="text" name="search" placeholder="Buscar por nombre, correo, libro o fecha" value="{{ search }}">
+        <form method="GET" action="{{ url_for('admin_historial') }}" style="text-align:center; margin-bottom:20px;">
+            <input type="text" name="search" placeholder="Buscar por nombre, correo, libro, código o fecha" value="{{ search }}">
             <button type="submit">Buscar</button>
         </form>
         <div class="table-section">
             <div style="overflow-x:auto;">
                 <table>
                     <tr>
+                        <th>Código Libro</th>
+                        <th>Libro</th>
                         <th>Nombre</th>
                         <th>Correo</th>
-                        <th>Libro</th>
                         <th>Grado</th>
                         <th>Curso</th>
-                        <th>Fecha préstamo</th>
-                        <th>Días solicitados</th>
+                        <th>Fecha Préstamo</th>
+                        <th>Días Solicitados</th>
+                        <th>Fecha Devolución</th>
                         <th>Devuelto</th>
                     </tr>
                     {% for prestamo in prestamos %}
                     <tr>
+                        <td>{{ prestamo['codigo_libro'] }}</td>
+                        <td>{{ prestamo['libro'] }}</td>
                         <td>{{ prestamo['nombre'] }}</td>
                         <td>{{ prestamo['correo'] }}</td>
-                        <td>{{ prestamo['libro'] }}</td>
                         <td>{{ prestamo['grado'] }}</td>
                         <td>{{ prestamo['curso'] }}</td>
                         <td>{{ prestamo['fecha_prestamo'] }}</td>
                         <td>{{ prestamo['dias'] }}</td>
+                        <td>{{ prestamo['fecha_devolucion'] if prestamo['fecha_devolucion'] else '' }}</td>
                         <td>
                             {% if prestamo['devuelto'] == 1 %}
                                 <span style="color:green;">Sí</span>
