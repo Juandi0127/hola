@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - Biblioteca</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        .admin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2em;
+            margin-top: 2em;
+        }
+        .admin-card {
+            background: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1.5em;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .admin-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+        .admin-card h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        .admin-card .btn {
+            width: 100%;
+            margin-top: 1em;
+            box-sizing: border-box; /* CORRECCIÓN: Asegura que el padding no desborde el botón */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h2>Panel de Administración</h2>
+            <a href="{{ url_for('logout_admin') }}" class="btn btn-danger">Cerrar Sesión</a>
+        </header>
+
+        <div class="admin-grid">
+            <div class="admin-card">
+                <h3>Gestión de Libros</h3>
+                <p>Añadir, editar o eliminar libros del inventario.</p>
+                <a href="{{ url_for('admin_libros') }}" class="btn">Gestionar Libros</a>
+            </div>
+            <div class="admin-card">
+                <h3>Préstamos Activos</h3>
+                <p>Ver y administrar los préstamos pendientes de devolución.</p>
+                <a href="{{ url_for('admin_prestamos') }}" class="btn">Ver Préstamos</a>
+            </div>
+            <div class="admin-card">
+                <h3>Historial General</h3>
+                <p>Consultar el historial completo de todos los préstamos.</p>
+                <a href="{{ url_for('admin_historial') }}" class="btn btn-secondary">Ver Historial</a>
+            </div>
+            <div class="admin-card">
+                <h3>Estadísticas Clave</h3>
+                <p>Visualizar datos sobre el uso de la biblioteca.</p>
+                <a href="{{ url_for('admin_estadisticas') }}" class="btn btn-secondary">Ver Estadísticas</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

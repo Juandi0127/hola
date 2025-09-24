@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>"{{ libro.titulo }}" - Detalles</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        /* These styles are specific to this page and can be moved to styles.css later */
+        .book-detail-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2em;
+            margin-top: 2em;
+        }
+        .book-info, .book-reviews {
+            background: #fff;
+            padding: 1.5em;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        .avg-rating {
+            display: flex;
+            align-items: center;
+            gap: 1em;
+            margin: 1em 0;
+        }
+        .stars-outer {
+            position: relative;
+            display: inline-block;
+            color: #ddd; /* Color for empty stars */
+            font-size: 2em;
+        }
+        .stars-inner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            color: #ffc107; /* Color for filled stars */
+        }
+        .review-card {
+            border-bottom: 1px solid #eee;
+            padding: 1em 0;
+        }
+        .review-card:last-child {
+            border-bottom: none;
+        }
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5em;
+        }
+        .review-author {
+            font-weight: bold;
+            font-size: 0.9em;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h2>Detalles del Libro</h2>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Volver al Dashboard</a>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category or 'success' }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="book-detail-grid">
+            <div class="book-info">
+                <h3>{{ libro.titulo }}</h3>
+                <p><strong>Autor:</strong> {{ libro.autor }}</p>
+                <p><strong>Editorial:</strong> {{ libro.editorial }}</p>
+                <p><strong>Sección:</strong> {{ libro.seccion }}</p>
+                
+                <div class="avg-rating">
+                    <h4>Calificación Promedio:</h4>
+                    <div class="stars-outer" title="{{ avg_rating }}/5">
+                        <div class="stars-inner" style="width: {{ (avg_rating / 5) * 100 }}%;">★★★★★</div>
+                        ★★★★★
+                    </div>
+                    <strong>{{ avg_rating }}/5</strong>
+                </div>
+
+                {% if libro.stock > 0 %}
+                    <a href="{{ url_for('prestar', libro_id=libro.id) }}" class="btn">Solicitar Préstamo ({{ libro.stock }} disponible(s))</a>
+                {% else %}
+                    <p class="btn btn-disabled">No disponible</p>
+                {% endif %}
+            </div>
+
+            <div class="book-reviews">
+                <h3>Reseñas de Usuarios</h3>
+                {% if reseñas %}
+                    {% for reseña in reseñas %}
+                    <div class="review-card">
+                        <div class="review-header">
+                            <span class="review-author">{{ reseña.correo.split('@')[0] }}</span>
+                            <div class="stars-outer" title="{{ reseña.calificacion }}/5">
+                                <div class="stars-inner" style="width: {{ (reseña.calificacion / 5) * 100 }}%;">★★★★★</div>
+                                ★★★★★
+                            </div>
+                        </div>
+                        <p>{{ reseña.comentario or 'No dejó comentario.' }}</p>
+                        <small class="review-date">Fecha: {{ reseña.fecha }}</small>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p>Este libro todavía no tiene reseñas. ¡Sé el primero en escribir una!</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

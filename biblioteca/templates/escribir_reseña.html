@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escribir Reseña - Biblioteca</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        .rating {
+            display: inline-block;
+            font-size: 2.5em;
+            direction: rtl; /* Right to left to make stars fill from right */
+        }
+        .rating input {
+            display: none;
+        }
+        .rating label {
+            color: #ddd;
+            cursor: pointer;
+            padding: 0 0.1em;
+            float: right;
+        }
+        .rating input:checked ~ label,
+        .rating label:hover,
+        .rating label:hover ~ label {
+            color: #ffc107;
+        }
+        .form-container textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h2>Escribir Reseña para "{{ libro.titulo }}"</h2>
+            <a href="{{ url_for('perfil') }}" class="btn btn-secondary">Cancelar</a>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category or 'success' }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="form-container" style="max-width: 700px; margin: 2em auto;">
+            <form method="post">
+                <div class="form-group">
+                    <label>Tu Calificación:</label>
+                    <div class="rating">
+                        <input type="radio" id="star5" name="calificacion" value="5" required><label for="star5">&#9733;</label>
+                        <input type="radio" id="star4" name="calificacion" value="4"><label for="star4">&#9733;</label>
+                        <input type="radio" id="star3" name="calificacion" value="3"><label for="star3">&#9733;</label>
+                        <input type="radio" id="star2" name="calificacion" value="2"><label for="star2">&#9733;</label>
+                        <input type="radio" id="star1" name="calificacion" value="1"><label for="star1">&#9733;</label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="comentario">Tu Reseña:</label>
+                    <textarea id="comentario" name="comentario" class="form-input" placeholder="Comparte tu opinión sobre el libro (opcional)"></textarea>
+                </div>
+
+                <button type="submit" class="btn" style="width:100%;">Enviar Reseña</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - Biblioteca ENSDB</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="login-container container">
+        <img src="{{ url_for('static', filename='escudo.jpg') }}" alt="Escudo ENSDB" class="escudo">
+        <h2>Biblioteca ENSDB</h2>
+        <p>Inicia sesión con tu correo institucional para acceder al sistema.</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash-message flash-{{ category or 'error' }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('login') }}">
+            <input type="email" name="correo" placeholder="usuario@ensdbexcelencia.edu.co" required>
+            <button type="submit" class="btn">Acceder como Estudiante</button>
+        </form>
+
+        <hr style="margin: 2em 0;">
+
+        <a href="{{ url_for('admin_login') }}" class="btn btn-secondary">Acceder como Administrador</a>
+    </div>
+</body>
+</html>

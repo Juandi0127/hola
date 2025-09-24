@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Libros - Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        .admin-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2em;
+        }
+        .form-container {
+            background: #fff;
+            padding: 1.5em;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        .action-form {
+            display: inline-block;
+            margin: 0;
+        }
+        @media (max-width: 768px) {
+            .admin-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h2>Gestión de Libros</h2>
+            <a href="{{ url_for('admin_panel') }}" class="btn btn-secondary">Volver al Panel</a>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category or 'success' }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="admin-content">
+            <div class="form-container">
+                <h3>Añadir Nuevo Libro</h3>
+                <form action="{{ url_for('admin_libros') }}" method="post">
+                    <input type="text" name="titulo" placeholder="Título del libro" required class="form-input">
+                    <input type="text" name="autor" placeholder="Autor del libro" required class="form-input">
+                    <input type="text" name="editorial" placeholder="Editorial del libro" required class="form-input">
+                    <input type="number" name="stock" placeholder="Cantidad disponible" min="1" required class="form-input">
+                    <input type="text" name="seccion" placeholder="Sección o categoría" required class="form-input">
+                    <button type="submit" class="btn" style="width:100%;">Agregar Libro</button>
+                </form>
+            </div>
+
+            <div class="table-container">
+                <h3>Inventario de Libros</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Título</th>
+                            <th>Autor</th>
+                            <th>Editorial</th>
+                            <th>Stock</th>
+                            <th>Sección</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for libro in libros %}
+                        <tr>
+                            <td>{{ libro['titulo'] }}</td>
+                            <td>{{ libro['autor'] }}</td>
+                            <td>{{ libro['editorial'] }}</td>
+                            <td>{{ libro['stock'] }}</td>
+                            <td>{{ libro['seccion'] }}</td>
+                            <td>
+                                <a href="{{ url_for('admin_editar_libro', libro_id=libro['id']) }}" class="btn btn-sm">Editar</a>
+                                <form action="{{ url_for('admin_eliminar_libro', libro_id=libro['id']) }}" method="post" class="action-form" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este libro? Esta acción puede no ser reversible.');">
+                                    <button type.="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6">No hay libros registrados.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

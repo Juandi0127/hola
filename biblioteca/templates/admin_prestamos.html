@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrar Préstamos - Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        .overdue td {
+            background-color: #f8d7da !important; /* Light red for overdue loans */
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h2>Préstamos Activos</h2>
+            <a href="{{ url_for('admin_panel') }}" class="btn btn-secondary">Volver al Panel</a>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category or 'success' }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="table-container">
+            <p>Aquí se listan todos los libros que están actualmente prestados y pendientes de devolución.</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Libro</th>
+                        <th>Estudiante</th>
+                        <th>Correo</th>
+                        <th>Curso</th>
+                        <th>Días Restantes</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prestamo in prestamos %}
+                    <tr class="{% if prestamo.dias_restantes <= 0 %}overdue{% endif %}">
+                        <td>{{ prestamo['libro'] }}</td>
+                        <td>{{ prestamo['nombre'] }}</td>
+                        <td>{{ prestamo['correo'] }}</td>
+                        <td>{{ prestamo['grado'] }} - {{ prestamo['curso'] }}</td>
+                        <td>
+                            {% if prestamo.dias_restantes > 0 %}
+                                {{ prestamo.dias_restantes }} día(s)
+                            {% else %}
+                                Vencido
+                            {% endif %}
+                        </td>
+                        <td>
+                            <form method="POST" action="{{ url_for('devolver_prestamo', prestamo_id=prestamo['id']) }}" style="margin:0;">
+                                <button type="submit" class="btn btn-success btn-sm">Marcar Devuelto</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6">No hay préstamos activos en este momento.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

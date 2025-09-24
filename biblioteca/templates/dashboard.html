@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca - Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        .recommendations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2em;
+            margin-bottom: 2em;
+        }
+        .recommendation-section {
+            background: #fff;
+            padding: 1.5em;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        .recommendation-section h3 {
+            margin-top: 0;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5em;
+            margin-bottom: 1em;
+        }
+        .reco-card-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1em;
+        }
+        .reco-card {
+            display: block;
+            padding: 1em;
+            background-color: #f8f9fa;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            color: #333;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .reco-card:hover {
+            background-color: #e9ecef;
+            transform: translateY(-2px);
+        }
+        .reco-card-title {
+            font-weight: bold;
+            margin: 0 0 0.25em 0;
+        }
+        .reco-card-author {
+            font-size: 0.9em;
+            color: #666;
+            margin: 0;
+        }
+        .reco-card-stat {
+            font-size: 0.8em;
+            color: var(--primary-color);
+            font-weight: bold;
+            margin-top: 0.5em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h2>Biblioteca ENSDB</h2>
+            <div class="user-profile">
+                <span>{{ correo }}</span>
+                <a href="{{ url_for('perfil') }}">
+                    <img src="{{ url_for('static', filename='escudo.jpg') }}" alt="Perfil">
+                </a>
+                <a href="{{ url_for('logout') }}" class="btn btn-danger">Cerrar Sesión</a>
+            </div>
+        </header>
+
+        <form method="GET" action="{{ url_for('dashboard') }}" class="search-form">
+            <input type="text" name="search" placeholder="Buscar por título, autor, sección o editorial..." value="{{ search }}">
+            <button type="submit">Buscar</button>
+        </form>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Recommendations Section -->
+        {% if not search %}
+        <div class="recommendations-grid">
+            {% if libros_populares %}
+            <div class="recommendation-section">
+                <h3>🌟 Los Más Populares</h3>
+                <div class="reco-card-list">
+                    {% for libro in libros_populares %}
+                    <a href="{{ url_for('libro_detalle', libro_id=libro.id) }}" class="reco-card">
+                        <p class="reco-card-title">{{ libro.titulo }}</p>
+                        <p class="reco-card-author">{{ libro.autor }}</p>
+                        <p class="reco-card-stat">{{ libro.total_prestamos }} préstamos</p>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if libros_mejor_calificados %}
+            <div class="recommendation-section">
+                <h3>❤️ Mejor Calificados</h3>
+                <div class="reco-card-list">
+                    {% for libro in libros_mejor_calificados %}
+                    <a href="{{ url_for('libro_detalle', libro_id=libro.id) }}" class="reco-card">
+                        <p class="reco-card-title">{{ libro.titulo }}</p>
+                        <p class="reco-card-author">{{ libro.autor }}</p>
+                        <p class="reco-card-stat">{{ "%.1f"|format(libro.avg_rating) }} ★</p>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Book Listings by Section -->
+        {% if secciones %}
+            {% for seccion, libros in secciones.items() %}
+                <div class="table-section">
+                    <h3>{{ seccion }}</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Autor</th>
+                                <th>Editorial</th>
+                                <th>Stock</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for libro in libros %}
+                            <tr>
+                                <td><a href="{{ url_for('libro_detalle', libro_id=libro.id) }}" class="book-title-link">{{ libro['titulo'] }}</a></td>
+                                <td>{{ libro['autor'] }}</td>
+                                <td>{{ libro['editorial'] }}</td>
+                                <td>{{ libro['stock'] }}</td>
+                                <td>
+                                    <a href="{{ url_for('prestar', libro_id=libro['id']) }}" class="btn btn-success">Solicitar Préstamo</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endfor %}
+        {% else %}
+             <div class="table-section">
+                <p>No hay libros disponibles que coincidan con tu búsqueda. Prueba con otros términos.</p>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

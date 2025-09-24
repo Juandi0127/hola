@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - Biblioteca</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h2>Mi Perfil</h2>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Volver al Dashboard</a>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category or 'success' }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="profile-info" style="text-align: center; margin-bottom: 2em;">
+            <img src="{{ url_for('static', filename='escudo.jpg') }}" alt="Foto de perfil" style="width:100px; height:100px; border-radius:50%; margin-bottom:1em;">
+            <h4>{{ correo }}</h4>
+        </div>
+
+        <div class="table-section">
+            <h3>Mis Préstamos Activos</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Libro</th>
+                        <th>Fecha de Préstamo</th>
+                        <th>Fecha de Devolución</th>
+                        <th>Días Restantes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prestamo in prestamos %}
+                    <tr class="{% if prestamo.dias_restantes <= 0 %}overdue{% endif %}">
+                        <td>{{ prestamo['libro'] }}</td>
+                        <td>{{ prestamo['fecha_prestamo'] }}</td>
+                        <td>{{ prestamo['fecha_devolucion'] }}</td>
+                        <td>
+                            {% if prestamo.dias_restantes > 0 %}
+                                {{ prestamo.dias_restantes }} día(s)
+                            {% else %}
+                                <span style="color: var(--error-color); font-weight: bold;">Vencido</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4">No tienes libros prestados actualmente.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-section">
+            <h3>Historial de Préstamos</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Libro</th>
+                        <th>Fecha de Préstamo</th>
+                        <th>Estado</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in historial %}
+                    <tr>
+                        <td>{{ p['libro'] }}</td>
+                        <td>{{ p['fecha_prestamo'] }}</td>
+                        <td>
+                            {% if p.devuelto %}
+                                <span style="color: var(--success-color);">Devuelto</span>
+                            {% else %}
+                                <span style="color: var(--error-color);">Pendiente</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if p.devuelto and not p.reseñado %}
+                                <a href="{{ url_for('escribir_reseña', prestamo_id=p.id) }}" class="btn btn-sm">Escribir Reseña</a>
+                            {% elif p.reseñado %}
+                                <span style="color: #777;">Reseñado</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4">No tienes historial de préstamos.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

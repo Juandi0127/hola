@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitar Préstamo - Biblioteca</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h2>Solicitar Préstamo</h2>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancelar</a>
+        </header>
+
+        <div class="loan-form-container" style="max-width: 600px; margin: auto;">
+            <div style="text-align: center; margin-bottom: 2em;">
+                <h4>Estás solicitando el libro:</h4>
+                <h3>{{ libro.titulo }}</h3>
+                <p>de {{ libro.autor }}</p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash-message flash-{{ category or 'error' }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST">
+                <p>Por favor, completa tus datos para el préstamo:</p>
+                <input type="text" name="nombre" placeholder="Nombre completo" required>
+                <input type="text" name="grado" placeholder="Grado (ej: 10, 11)" required>
+                <input type="text" name="curso" placeholder="Curso (ej: A, B)" required>
+                <input type="number" name="dias" placeholder="Días de préstamo (máx. 8 días)" min="1" max="8" required>
+                <button type="submit" class="btn" style="width: 100%;">Confirmar Solicitud</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

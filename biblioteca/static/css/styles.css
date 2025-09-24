@@ -1,0 +1,202 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --primary-color: #4a90e2; /* Un azul más moderno */
+    --secondary-color: #f5f7fa; /* Un gris claro para los fondos */
+    --text-color: #333;
+    --heading-color: #1a2533;
+    --success-color: #5cb85c;
+    --error-color: #d9534f;
+    --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    --border-radius: 12px;
+}
+
+body {
+    background-color: var(--secondary-color);
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 20px;
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 960px;
+    margin: 20px auto;
+    background: #fff;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 2em;
+}
+
+/* Encabezado y Navegación */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2em;
+    padding-bottom: 1em;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.header h2 {
+    color: var(--heading-color);
+    margin: 0;
+}
+
+.header .user-profile {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header .user-profile img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary-color);
+}
+
+/* Formularios */
+form {
+    display: flex;
+    flex-direction: column; /* Apila los elementos del formulario verticalmente */
+    gap: 15px; /* Añade espacio entre los elementos del formulario */
+    margin-bottom: 2em;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="number"],
+input[type="password"] {
+    width: calc(100% - 24px);
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 5px rgba(74, 144, 226, 0.5);
+}
+
+/* Contenedor para los botones del panel de admin */
+.admin-panel-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Espacio entre los botones */
+    margin-top: 2em;
+    align-items: stretch; /* Estira los botones para que tengan el mismo ancho */
+}
+
+.admin-panel-actions .btn {
+    text-align: center; /* Centra el texto de los botones */
+    width: 100%; /* Ocupan todo el ancho del contenedor */
+    box-sizing: border-box; /* Asegura que el padding no cause desbordamiento */
+}
+
+
+/* Botones */
+button, .btn {
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+button:hover, .btn:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+}
+
+.btn-danger {
+    background-color: var(--error-color);
+}
+
+.btn-success {
+    background-color: var(--success-color);
+}
+
+
+/* Tablas */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 2em;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+th, td {
+    padding: 15px;
+    border-bottom: 1px solid #e0e0e0;
+    text-align: left;
+}
+
+th {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 600;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Secciones de la página */
+.table-section {
+    margin-bottom: 2.5em;
+}
+
+.table-section h3 {
+    color: var(--heading-color);
+    border-left: 4px solid var(--primary-color);
+    padding-left: 10px;
+    margin-bottom: 1.5em;
+}
+
+/* Mensajes Flash */
+.flash-message {
+    padding: 15px;
+    border-radius: var(--border-radius);
+    margin-bottom: 1.5em;
+    text-align: center;
+    font-weight: 500;
+}
+
+.flash-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.flash-error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* Login */
+.login-container {
+    max-width: 450px;
+    margin: 60px auto;
+    text-align: center;
+}
