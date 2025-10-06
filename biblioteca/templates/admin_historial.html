@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Historial de préstamos</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
@@ -19,38 +20,42 @@
         <div class="table-section">
             <div style="overflow-x:auto;">
                 <table>
-                    <tr>
-                        <th>Código Libro</th>
-                        <th>Libro</th>
-                        <th>Nombre</th>
-                        <th>Correo</th>
-                        <th>Grado</th>
-                        <th>Curso</th>
-                        <th>Fecha Préstamo</th>
-                        <th>Días Solicitados</th>
-                        <th>Fecha Devolución</th>
-                        <th>Devuelto</th>
-                    </tr>
-                    {% for prestamo in prestamos %}
-                    <tr>
-                        <td>{{ prestamo['codigo_libro'] }}</td>
-                        <td>{{ prestamo['libro'] }}</td>
-                        <td>{{ prestamo['nombre'] }}</td>
-                        <td>{{ prestamo['correo'] }}</td>
-                        <td>{{ prestamo['grado'] }}</td>
-                        <td>{{ prestamo['curso'] }}</td>
-                        <td>{{ prestamo['fecha_prestamo'] }}</td>
-                        <td>{{ prestamo['dias'] }}</td>
-                        <td>{{ prestamo['fecha_devolucion'] if prestamo['fecha_devolucion'] else '' }}</td>
-                        <td>
-                            {% if prestamo['devuelto'] == 1 %}
-                                <span style="color:green;">Sí</span>
-                            {% else %}
-                                <span style="color:red;">No</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
+                    <thead>
+                        <tr>
+                            <th>Código Libro</th>
+                            <th>Libro</th>
+                            <th>Nombre</th>
+                            <th>Correo</th>
+                            <th>Grado</th>
+                            <th>Curso</th>
+                            <th>Fecha Préstamo</th>
+                            <th>Días Solicitados</th>
+                            <th>Fecha Devolución</th>
+                            <th>Devuelto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prestamo in prestamos %}
+                        <tr>
+                            <td data-label="Código Libro">{{ prestamo['codigo_libro'] }}</td>
+                            <td data-label="Libro">{{ prestamo['libro'] }}</td>
+                            <td data-label="Nombre">{{ prestamo['nombre'] }}</td>
+                            <td data-label="Correo">{{ prestamo['correo'] }}</td>
+                            <td data-label="Grado">{{ prestamo['grado'] }}</td>
+                            <td data-label="Curso">{{ prestamo['curso'] }}</td>
+                            <td data-label="Fecha Préstamo">{{ prestamo['fecha_prestamo'] }}</td>
+                            <td data-label="Días Solicitados">{{ prestamo['dias'] }}</td>
+                            <td data-label="Fecha Devolución">{{ prestamo['fecha_devolucion'] if prestamo['fecha_devolucion'] else '' }}</td>
+                            <td data-label="Devuelto">
+                                {% if prestamo['devuelto'] == 1 %}
+                                    <span style="color:green;">Sí</span>
+                                {% else %}
+                                    <span style="color:red;">No</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
                 </table>
             </div>
         </div>

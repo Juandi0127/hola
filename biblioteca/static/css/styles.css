@@ -19,15 +19,19 @@ body {
     padding: 20px;
     color: var(--text-color);
     line-height: 1.6;
+    background-image: url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+    background-size: cover;
+    background-position: center;
 }
 
-.container {
+.container, .admin-container {
     max-width: 960px;
     margin: 20px auto;
     background: #fff;
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
     padding: 2em;
+    overflow-x: auto; /* Permite el desplazamiento horizontal si es necesario */
 }
 
 /* Encabezado y Navegación */
@@ -155,11 +159,15 @@ th {
     font-weight: 600;
 }
 
-tr:nth-child(even) {
+tbody tr {
+    background-color: #fff;
+}
+
+tbody tr:nth-child(even) {
     background-color: #f9f9f9;
 }
 
-tr:hover {
+tbody tr:hover {
     background-color: #f1f1f1;
 }
 
@@ -199,4 +207,74 @@ tr:hover {
     max-width: 450px;
     margin: 60px auto;
     text-align: center;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 2em;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+}
+
+/* Media Queries for Mobile */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    .container, .admin-container {
+        padding: 1em;
+        margin: 10px auto;
+    }
+
+    .header {
+        flex-direction: column;
+        gap: 1em;
+    }
+
+    table, thead, tbody, th, td, tr {
+        display: block;
+    }
+
+    thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    tr {
+        border: 1px solid #ccc;
+        margin-bottom: 10px;
+    }
+
+    td {
+        border: none;
+        border-bottom: 1px solid #eee;
+        position: relative;
+        padding-left: 50%;
+        text-align: right;
+    }
+
+    td:before {
+        position: absolute;
+        left: 10px;
+        width: calc(50% - 20px);
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: bold;
+        content: attr(data-label);
+    }
+    
+    input[type="text"],
+    input[type="email"],
+    input[type="number"],
+    input[type="password"] {
+        width: calc(100% - 20px);
+    }
+}
+
+
+@media (max-width: 600px) {
+    .login-container {
+        width: 90%;
+        padding: 1.5em;
+    }
 }

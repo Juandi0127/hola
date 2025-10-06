@@ -180,12 +180,12 @@
                         <tbody>
                             {% for libro in libros %}
                             <tr>
-                                <td>{{ libro['codigo_libro'] }}</td>
-                                <td><a href="{{ url_for('libro_detalle', libro_id=libro.id) }}" class="book-title-link">{{ libro['titulo'] }}</a></td>
-                                <td>{{ libro['autor'] }}</td>
-                                <td>{{ libro['editorial'] }}</td>
-                                <td>{{ libro['stock'] }}</td>
-                                <td>
+                                <td data-label="Código">{{ libro['codigo_libro'] }}</td>
+                                <td data-label="Título"><a href="{{ url_for('libro_detalle', libro_id=libro.id) }}" class="book-title-link">{{ libro['titulo'] }}</a></td>
+                                <td data-label="Autor">{{ libro['autor'] }}</td>
+                                <td data-label="Editorial">{{ libro['editorial'] }}</td>
+                                <td data-label="Stock">{{ libro['stock'] }}</td>
+                                <td data-label="Acción">
                                     <a href="{{ url_for('prestar', libro_id=libro['id']) }}" class="btn btn-success">Solicitar Préstamo</a>
                                 </td>
                             </tr>

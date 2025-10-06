@@ -73,13 +73,13 @@
                     <tbody>
                         {% for libro in libros %}
                         <tr>
-                            <td>{{ libro['codigo_libro'] }}</td>
-                            <td>{{ libro['titulo'] }}</td>
-                            <td>{{ libro['autor'] }}</td>
-                            <td>{{ libro['editorial'] }}</td>
-                            <td>{{ libro['stock'] }}</td>
-                            <td>{{ libro['seccion'] }}</td>
-                            <td>
+                            <td data-label="Código">{{ libro['codigo_libro'] }}</td>
+                            <td data-label="Título">{{ libro['titulo'] }}</td>
+                            <td data-label="Autor">{{ libro['autor'] }}</td>
+                            <td data-label="Editorial">{{ libro['editorial'] }}</td>
+                            <td data-label="Stock">{{ libro['stock'] }}</td>
+                            <td data-label="Sección">{{ libro['seccion'] }}</td>
+                            <td data-label="Acciones">
                                 <a href="{{ url_for('admin_editar_libro', libro_id=libro['id']) }}" class="btn btn-sm">Editar</a>
                                 <form action="{{ url_for('admin_eliminar_libro', libro_id=libro['id']) }}" method="post" class="action-form" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este libro? Esta acción puede no ser reversible.');">
                                     <button type.="submit" class="btn btn-sm btn-danger">Eliminar</button>

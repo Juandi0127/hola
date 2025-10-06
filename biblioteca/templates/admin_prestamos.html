@@ -45,19 +45,19 @@
                     <tbody>
                         {% for prestamo in prestamos %}
                         <tr class="{% if prestamo.dias_restantes <= 0 %}overdue{% endif %}">
-                            <td>{{ prestamo['codigo_libro'] }}</td>
-                            <td>{{ prestamo['libro'] }}</td>
-                            <td>{{ prestamo['nombre'] }}</td>
-                            <td>{{ prestamo['correo'] }}</td>
-                            <td>{{ prestamo['grado'] }} - {{ prestamo['curso'] }}</td>
-                            <td>
+                            <td data-label="Código Libro">{{ prestamo['codigo_libro'] }}</td>
+                            <td data-label="Libro">{{ prestamo['libro'] }}</td>
+                            <td data-label="Estudiante">{{ prestamo['nombre'] }}</td>
+                            <td data-label="Correo">{{ prestamo['correo'] }}</td>
+                            <td data-label="Curso">{{ prestamo['grado'] }} - {{ prestamo['curso'] }}</td>
+                            <td data-label="Días Restantes">
                                 {% if prestamo.dias_restantes > 0 %}
                                     {{ prestamo.dias_restantes }} día(s)
                                 {% else %}
                                     Vencido
                                 {% endif %}
                             </td>
-                            <td>
+                            <td data-label="Acción">
                                 <form method="POST" action="{{ url_for('devolver_prestamo', prestamo_id=prestamo['id']) }}" style="margin:0;">
                                     <button type="submit" class="btn btn-success btn-sm">Marcar Devuelto</button>
                                 </form>
