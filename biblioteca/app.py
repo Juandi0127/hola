@@ -1,59 +1,118 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory, jsonify
 import sqlite3
 from datetime import datetime, timedelta
 import os
+import time
+from werkzeug.utils import secure_filename
+import shutil
 
 app = Flask(__name__)
 app.secret_key = 'ENSDB123'
 
 DATABASE = 'biblioteca.db'
+# NEW: usar ruta absoluta dentro del paquete 'biblioteca'
+BASE_DIR = os.path.dirname(__file__)
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+ALLOWED_EXT = {'png', 'jpg', 'jpeg', 'gif', 'pdf'}
 
 def get_db_connection():
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
     return conn
 
+def allowed_file(filename):
+    return filename and '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXT
+
+def save_file(file):
+    if not file or file.filename == '':
+        return None
+    if not allowed_file(file.filename):
+        return None
+    fname = secure_filename(file.filename)
+    fname = f"{int(time.time())}_{fname}"
+    # asegurar carpeta uploads dentro del paquete
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    dst = os.path.join(app.config['UPLOAD_FOLDER'], fname)
+    file.save(dst)
+
+    # opcional: copiar imágenes a static/images para verlas fácilmente
+    ext = fname.rsplit('.', 1)[1].lower()
+    if ext in {'png', 'jpg', 'jpeg', 'gif'}:
+        static_images_dir = os.path.join(BASE_DIR, 'static', 'images')
+        os.makedirs(static_images_dir, exist_ok=True)
+        try:
+            shutil.copyfile(dst, os.path.join(static_images_dir, fname))
+        except Exception as e:
+            print("WARN: no se pudo copiar la portada a static/images:", e)
+
+    # DEBUG: imprimir rutas y nombre guardado
+    print("DEBUG saved file:", dst)
+    return fname
+
 def crear_tablas():
     with get_db_connection() as conn:
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS libro (
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS biblioteca_virtual (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                titulo TEXT NOT NULL,
-                autor TEXT NOT NULL,
-                editorial TEXT NOT NULL,
-                stock INTEGER NOT NULL,
-                seccion TEXT NOT NULL,
-                codigo_libro TEXT
+                titulo TEXT,
+                descripcion TEXT,
+                filename TEXT,
+                cover_filename TEXT,
+                curso TEXT,
+                letra TEXT,
+                letra_from TEXT,
+                letra_to TEXT,
+                fecha_subida TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
-        """)
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS prestamo (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                nombre TEXT NOT NULL,
-                grado TEXT NOT NULL,
-                curso TEXT NOT NULL,
-                libro_id INTEGER NOT NULL,
-                dias INTEGER NOT NULL,
-                correo TEXT NOT NULL,
-                fecha_prestamo TEXT NOT NULL,
-                devuelto INTEGER DEFAULT 0,
-                fecha_devolucion TEXT,
-                reseñado INTEGER DEFAULT 0,
-                FOREIGN KEY(libro_id) REFERENCES libro(id)
-            )
-        """)
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS reseña (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                libro_id INTEGER NOT NULL,
-                correo TEXT NOT NULL,
-                calificacion INTEGER NOT NULL,
-                comentario TEXT,
-                fecha TEXT NOT NULL,
-                FOREIGN KEY(libro_id) REFERENCES libro(id)
-            )
-        """)
+        ''')
         conn.commit()
+
+        # migraciones: agregar columnas si faltan (silencioso)
+        cols = [r[1] for r in conn.execute("PRAGMA table_info(biblioteca_virtual)").fetchall()]
+        # mantener compatibilidad con versiones previas
+        if 'cover_filename' not in cols:
+            try:
+                conn.execute("ALTER TABLE biblioteca_virtual ADD COLUMN cover_filename TEXT")
+                conn.commit()
+            except Exception:
+                pass
+        if 'curso' not in cols:
+            try:
+                conn.execute("ALTER TABLE biblioteca_virtual ADD COLUMN curso TEXT")
+                conn.commit()
+            except Exception:
+                pass
+        if 'letra' not in cols:
+            try:
+                conn.execute("ALTER TABLE biblioteca_virtual ADD COLUMN letra TEXT")
+                conn.commit()
+            except Exception:
+                pass
+        # nuevas columnas para rango (admin)
+        if 'letra_from' not in cols:
+            try:
+                conn.execute("ALTER TABLE biblioteca_virtual ADD COLUMN letra_from TEXT")
+                conn.commit()
+            except Exception:
+                pass
+        if 'letra_to' not in cols:
+            try:
+                conn.execute("ALTER TABLE biblioteca_virtual ADD COLUMN letra_to TEXT")
+                conn.commit()
+            except Exception:
+                pass
+
+        # asegurar columna portada en libro si tabla vieja no la tiene
+        cols_libro = [r[1] for r in conn.execute("PRAGMA table_info(libro)").fetchall()]
+        if 'portada_filename' not in cols_libro:
+            try:
+                conn.execute("ALTER TABLE libro ADD COLUMN portada_filename TEXT")
+                conn.commit()
+            except Exception:
+                pass
+    conn.close()
 
 def generar_codigo_libro(conn, seccion, libro_id):
     seccion_prefix = seccion[:3].upper()
@@ -158,13 +217,14 @@ def dashboard():
     conn.close()
     
     return render_template('dashboard.html', 
-                           correo=session['correo'], 
-                           secciones_agrupadas=secciones_agrupadas, 
-                           search=search_query,
-                           secciones_disponibles=secciones_disponibles,
-                           seccion_actual=seccion_filter,
-                           libros_populares=libros_populares, 
-                           libros_mejor_calificados=libros_mejor_calificados)
+                            correo=session['correo'], 
+                            secciones_agrupadas=secciones_agrupadas, 
+                            search=search_query,
+                            secciones_disponibles=secciones_disponibles,
+                            seccion_actual=seccion_filter,
+                            libros_populares=libros_populares, 
+                            libros_mejor_calificados=libros_mejor_calificados,
+                            page='dashboard')
 
 
 @app.route('/libro/<int:libro_id>')
@@ -234,8 +294,8 @@ def perfil():
     
     prestamos_activos_raw = conn.execute("""
         SELECT p.*, l.titulo AS libro, l.autor, l.codigo_libro
-           FROM prestamo p JOIN libro l ON p.libro_id = l.id 
-           WHERE p.correo = ? AND p.devuelto = 0
+        FROM prestamo p JOIN libro l ON p.libro_id = l.id 
+        WHERE p.correo = ? AND p.devuelto = 0
     """, (user_email,)).fetchall()
 
     prestamos_activos = []
@@ -251,8 +311,8 @@ def perfil():
 
     historial = conn.execute("""
         SELECT p.*, l.titulo AS libro, l.codigo_libro
-           FROM prestamo p JOIN libro l ON p.libro_id = l.id 
-           WHERE p.correo = ? ORDER BY p.fecha_prestamo DESC
+        FROM prestamo p JOIN libro l ON p.libro_id = l.id 
+        WHERE p.correo = ? ORDER BY p.fecha_prestamo DESC
     """, (user_email,)).fetchall()
     
     conn.close()
@@ -339,11 +399,15 @@ def admin_libros():
         editorial = request.form['editorial']
         stock = request.form['stock']
         seccion = request.form['seccion']
+
+        # guardar portada si viene
+        portada_file = request.files.get('portada')
+        portada_fname = save_file(portada_file) if portada_file and portada_file.filename != '' else None
         
         cursor = conn.cursor()
         cursor.execute(
-            'INSERT INTO libro (titulo, autor, editorial, stock, seccion) VALUES (?, ?, ?, ?, ?)',
-            (titulo, autor, editorial, stock, seccion)
+            'INSERT INTO libro (titulo, autor, editorial, stock, seccion, portada_filename) VALUES (?, ?, ?, ?, ?, ?)',
+            (titulo, autor, editorial, stock, seccion, portada_fname)
         )
         nuevo_libro_id = cursor.lastrowid
         
@@ -419,9 +483,9 @@ def admin_prestamos():
     conn = get_db_connection()
     prestamos_raw = conn.execute("""
         SELECT p.*, l.titulo as libro, l.codigo_libro 
-           FROM prestamo p JOIN libro l ON p.libro_id = l.id
-           WHERE p.devuelto = 0 
-           ORDER BY p.fecha_prestamo
+        FROM prestamo p JOIN libro l ON p.libro_id = l.id
+        WHERE p.devuelto = 0 
+        ORDER BY p.fecha_prestamo
     """).fetchall()
     
     prestamos_list = []
@@ -466,7 +530,7 @@ def admin_historial():
     conn = get_db_connection()
 
     base_query = """SELECT p.*, l.titulo as libro, l.codigo_libro
-                     FROM prestamo p JOIN libro l ON p.libro_id = l.id"""
+                    FROM prestamo p JOIN libro l ON p.libro_id = l.id"""
     params = []
 
     if search_query:
@@ -505,10 +569,10 @@ def admin_estadisticas():
     conn.close()
     
     return render_template('admin_estadisticas.html',
-                           libros_populares=libros_populares,
-                           usuarios_activos=usuarios_activos,
-                           total_prestamos=total_prestamos,
-                           total_libros=total_libros or 0)
+                            libros_populares=libros_populares,
+                            usuarios_activos=usuarios_activos,
+                            total_prestamos=total_prestamos,
+                            total_libros=total_libros or 0)
 
 @app.route('/logout_admin')
 def logout_admin():
@@ -516,7 +580,167 @@ def logout_admin():
     flash('Has cerrado la sesión de administrador.', 'success')
     return redirect(url_for('login'))
 
+# --- Virtual Library Routes ---
+@app.route('/biblioteca_virtual')
+def biblioteca_virtual():
+    if 'correo' not in session:
+        return redirect(url_for('login'))
+
+    search_query = request.args.get('search', '').strip()
+    curso_filter = request.args.get('curso', '').strip()
+    letra_filter = request.args.get('letra', '').strip().upper()[:1] if request.args.get('letra') else ''
+
+    conn = get_db_connection()
+    query = "SELECT * FROM biblioteca_virtual WHERE 1=1"
+    params = []
+
+    if search_query:
+        query += " AND titulo LIKE ?"
+        params.append(f'%{search_query}%')
+
+    if curso_filter:
+        query += " AND curso = ?"
+        params.append(curso_filter)
+
+    if letra_filter:
+        # coincidir letra única OR estar dentro del rango definido por admin (letra_from <= letra <= letra_to)
+        query += (" AND (UPPER(letra) = ? OR "
+                    "(letra_from IS NOT NULL AND letra_to IS NOT NULL AND UPPER(letra_from) <= ? AND UPPER(letra_to) >= ?))")
+        params.extend([letra_filter, letra_filter, letra_filter])
+
+    query += " ORDER BY fecha_subida DESC"
+    documentos = conn.execute(query, params).fetchall()
+    conn.close()
+    return render_template('biblioteca_virtual.html',
+                            documentos=documentos,
+                            page='biblioteca_virtual',
+                            search=search_query,
+                            curso=curso_filter,
+                            letra=letra_filter)
+
+
+@app.route('/api/documentos/titulos')
+def documentos_titulos():
+    conn = get_db_connection()
+    titulos = conn.execute("SELECT DISTINCT titulo FROM biblioteca_virtual").fetchall()
+    conn.close()
+    return jsonify([titulo['titulo'] for titulo in titulos])
+
+@app.route('/admin/biblioteca_virtual', methods=['GET', 'POST'])
+def admin_biblioteca_virtual():
+    if not session.get('admin'):
+        return redirect(url_for('admin_login'))
+
+    if request.method == 'POST':
+        titulo = request.form.get('titulo','').strip()
+        descripcion = request.form.get('descripcion','').strip()
+        curso = request.form.get('curso','').strip()
+        # admin puede indicar rango: letra_from y letra_to (opcionales)
+        letra_from = (request.form.get('letra_from') or '').strip().upper()[:1] or None
+        letra_to = (request.form.get('letra_to') or '').strip().upper()[:1] or None
+        # también conservar campo letra individual si se usa (compatibilidad)
+        letra = (request.form.get('letra') or '').strip().upper()[:1] or None
+
+        file = request.files.get('file')
+        if file and file.filename != '':
+            filename = save_file(file)
+            fecha_subida = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            conn = get_db_connection()
+            conn.execute(
+                'INSERT INTO biblioteca_virtual (titulo, descripcion, filename, fecha_subida, curso, letra, letra_from, letra_to) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                (titulo, descripcion, filename, fecha_subida, curso, letra, letra_from, letra_to)
+            )
+            conn.commit()
+            conn.close()
+            flash('Documento subido exitosamente.', 'success')
+        else:
+            flash('No se seleccionó ningún archivo.', 'error')
+        return redirect(url_for('admin_biblioteca_virtual'))
+
+    conn = get_db_connection()
+    documentos = conn.execute('SELECT * FROM biblioteca_virtual ORDER BY fecha_subida DESC').fetchall()
+    conn.close()
+    return render_template('admin_biblioteca_virtual.html', documentos=documentos)
+
+@app.route('/admin/biblioteca_virtual/edit/<int:doc_id>', methods=['GET', 'POST'])
+def admin_edit_biblioteca_virtual(doc_id):
+    if not session.get('admin'):
+        return redirect(url_for('admin_login'))
+    conn = get_db_connection()
+    doc = conn.execute('SELECT * FROM biblioteca_virtual WHERE id = ?', (doc_id,)).fetchone()
+    if not doc:
+        conn.close()
+        flash('Documento no encontrado.', 'error')
+        return redirect(url_for('admin_biblioteca_virtual'))
+
+    if request.method == 'POST':
+        titulo = request.form.get('titulo','').strip()
+        descripcion = request.form.get('descripcion','').strip()
+        curso = request.form.get('curso','').strip()
+        letra_from = (request.form.get('letra_from') or '').strip().upper()[:1] or None
+        letra_to = (request.form.get('letra_to') or '').strip().upper()[:1] or None
+        letra = (request.form.get('letra') or '').strip().upper()[:1] or None
+
+        file = request.files.get('file')
+        filename = doc['filename']
+        if file and file.filename != '':
+            nuevo = save_file(file)
+            if nuevo:
+                try:
+                    old_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    if filename and os.path.exists(old_path):
+                        os.remove(old_path)
+                    static_copy = os.path.join(BASE_DIR, 'static', 'images', filename)
+                    if os.path.exists(static_copy):
+                        os.remove(static_copy)
+                except Exception:
+                    pass
+                filename = nuevo
+        conn.execute('UPDATE biblioteca_virtual SET titulo = ?, descripcion = ?, filename = ?, curso = ?, letra = ?, letra_from = ?, letra_to = ? WHERE id = ?',
+                    (titulo, descripcion, filename, curso, letra, letra_from, letra_to, doc_id))
+        conn.commit()
+        conn.close()
+        flash('Documento actualizado.', 'success')
+        return redirect(url_for('admin_biblioteca_virtual'))
+
+    conn.close()
+    return render_template('admin_edit_biblioteca_virtual.html', doc=doc)
+
+@app.route('/admin/biblioteca_virtual/delete/<int:doc_id>', methods=['POST'])
+def admin_delete_biblioteca_virtual(doc_id):
+    if not session.get('admin'):
+        return redirect(url_for('admin_login'))
+    conn = get_db_connection()
+    doc = conn.execute('SELECT * FROM biblioteca_virtual WHERE id = ?', (doc_id,)).fetchone()
+    if not doc:
+        conn.close()
+        flash('Documento no encontrado.', 'error')
+        return redirect(url_for('admin_biblioteca_virtual'))
+
+    try:
+        if doc['filename']:
+            p = os.path.join(app.config['UPLOAD_FOLDER'], doc['filename'])
+            if os.path.exists(p):
+                os.remove(p)
+            static_copy = os.path.join(BASE_DIR, 'static', 'images', doc['filename'])
+            if os.path.exists(static_copy):
+                os.remove(static_copy)
+    except Exception:
+        pass
+
+    conn.execute('DELETE FROM biblioteca_virtual WHERE id = ?', (doc_id,))
+    conn.commit()
+    conn.close()
+    flash('Documento eliminado correctamente.', 'success')
+    return redirect(url_for('admin_biblioteca_virtual'))
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
 if __name__ == '__main__':
+    # usar la ruta absoluta configurada
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     crear_tablas()
     aplicar_migraciones()
     app.run(debug=True)

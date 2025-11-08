@@ -31,8 +31,7 @@
 <body>
     <div class="container">
         <header class="header">
-            <h2>Gestión de Libros</h2>
-            <a href="{{ url_for('admin_panel') }}" class="btn btn-secondary">Volver al Panel</a>
+            <h2>Gestionar libros</h2>
         </header>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -43,20 +42,61 @@
             {% endif %}
         {% endwith %}
 
+        {% block content %}
+        <div style="margin-bottom:1rem;">
+          <a href="{{ url_for('admin_panel') }}" class="btn-anim" style="display:inline-flex;align-items:center;gap:.5rem;">← Volver al panel</a>
+        </div>
         <div class="admin-content">
-            <div class="form-container">
-                <h3>Añadir Nuevo Libro</h3>
-                <form action="{{ url_for('admin_libros') }}" method="post">
-                    <input type="text" name="titulo" placeholder="Título del libro" required class="form-input">
-                    <input type="text" name="autor" placeholder="Autor del libro" required class="form-input">
-                    <input type="text" name="editorial" placeholder="Editorial del libro" required class="form-input">
-                    <input type="number" name="stock" placeholder="Cantidad disponible" min="1" required class="form-input">
-                    <input type="text" name="seccion" placeholder="Sección o categoría" required class="form-input">
-                    <button type="submit" class="btn" style="width:100%;">Agregar Libro</button>
-                </form>
-            </div>
+            <!-- FORMULARIO: agregar libro -->
+            <form method="post" enctype="multipart/form-data" class="book-form" style="max-width:900px;margin:0 auto;">
+              <div class="form-row">
+                <div class="field">
+                  <label for="titulo">Título</label>
+                  <input id="titulo" type="text" name="titulo" placeholder="Título" required />
+                </div>
+                <div class="field">
+                  <label for="autor">Autor</label>
+                  <input id="autor" type="text" name="autor" placeholder="Autor" required />
+                </div>
+              </div>
 
-            <div class="table-container">
+              <div class="form-row">
+                <div class="field">
+                  <label for="editorial">Editorial</label>
+                  <input id="editorial" type="text" name="editorial" placeholder="Editorial" required />
+                </div>
+
+                <div class="field small">
+                  <label for="stock">Stock</label>
+                  <input id="stock" type="number" name="stock" placeholder="Stock" min="0" value="1" required />
+                </div>
+
+                <div class="field">
+                  <label for="seccion">Sección</label>
+                  <input id="seccion" type="text" name="seccion" placeholder="Sección" required />
+                </div>
+              </div>
+
+              <div class="form-row" style="flex-direction:column;">
+                <label for="descripcion">Descripción</label>
+                <textarea id="descripcion" name="descripcion" placeholder="Descripción (opcional)" rows="3"></textarea>
+              </div>
+
+              <!-- NUEVO: campo portada para libros -->
+              <div class="form-row">
+                <div class="field">
+                  <label for="portada">Portada (imagen)</label>
+                  <input id="portada" name="portada" type="file" accept="image/*" />
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn-anim">Añadir libro</button>
+              </div>
+            </form>
+
+            <!-- Lista de libros existente -->
+            <div class="books-list">
                 <h3>Inventario de Libros</h3>
                 <table>
                     <thead>
@@ -73,13 +113,13 @@
                     <tbody>
                         {% for libro in libros %}
                         <tr>
-                            <td>{{ libro['codigo_libro'] }}</td>
-                            <td>{{ libro['titulo'] }}</td>
-                            <td>{{ libro['autor'] }}</td>
-                            <td>{{ libro['editorial'] }}</td>
-                            <td>{{ libro['stock'] }}</td>
-                            <td>{{ libro['seccion'] }}</td>
-                            <td>
+                            <td data-label="Código">{{ libro['codigo_libro'] }}</td>
+                            <td data-label="Título">{{ libro['titulo'] }}</td>
+                            <td data-label="Autor">{{ libro['autor'] }}</td>
+                            <td data-label="Editorial">{{ libro['editorial'] }}</td>
+                            <td data-label="Stock">{{ libro['stock'] }}</td>
+                            <td data-label="Sección">{{ libro['seccion'] }}</td>
+                            <td data-label="Acciones">
                                 <a href="{{ url_for('admin_editar_libro', libro_id=libro['id']) }}" class="btn btn-sm">Editar</a>
                                 <form action="{{ url_for('admin_eliminar_libro', libro_id=libro['id']) }}" method="post" class="action-form" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este libro? Esta acción puede no ser reversible.');">
                                     <button type.="submit" class="btn btn-sm btn-danger">Eliminar</button>
@@ -95,6 +135,7 @@
                 </table>
             </div>
         </div>
+        {% endblock %}
     </div>
 </body>
 </html>

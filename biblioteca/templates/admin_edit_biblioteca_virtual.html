@@ -1,0 +1,26 @@
+{% extends 'admin_panel.html' %}
+
+{% block content %}
+<div style="margin-bottom:1rem;">{% include 'admin_back_button.html' %}</div>
+
+<h2>Editar documento</h2>
+
+<form method="post" enctype="multipart/form-data" style="max-width:900px;">
+  <div style="margin-bottom:.5rem;">
+    <label>Título</label>
+    <input name="titulo" value="{{ doc.titulo }}" required style="width:100%;padding:.5rem;border:1px solid #e6e9ef;border-radius:6px;">
+  </div>
+  <div style="margin-bottom:.5rem;">
+    <label>Descripción</label>
+    <textarea name="descripcion" rows="4" style="width:100%;padding:.5rem;border:1px solid #e6e9ef;border-radius:6px;">{{ doc.descripcion }}</textarea>
+  </div>
+  <div style="margin-bottom:.5rem;">
+    <label>Reemplazar archivo (opcional)</label>
+    <input type="file" name="file" accept=".pdf">
+  </div>
+  <div style="display:flex;gap:.5rem;">
+    <button class="btn-anim" type="submit">Guardar</button>
+    <a class="btn-anim" href="{{ url_for('admin_biblioteca_virtual') }}" style="background:#f3f4f6;color:#0f172a;">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

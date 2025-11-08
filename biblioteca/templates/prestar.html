@@ -37,6 +37,21 @@
                 <button type="submit" class="btn" style="width: 100%;">Confirmar Solicitud</button>
             </form>
         </div>
+
+        <div class="prestar-main" style="display:flex;gap:1rem;align-items:flex-start;">
+          <div style="width:140px;">
+            {% if libro.portada_filename %}
+              <img src="{{ url_for('uploaded_file', filename=libro.portada_filename) }}" alt="Portada" style="width:100%; object-fit:contain; border-radius:6px;">
+            {% else %}
+              <img src="{{ url_for('static', filename='images/placeholder_book.png') }}" alt="Sin portada" style="width:100%; object-fit:contain; border-radius:6px;">
+            {% endif %}
+          </div>
+          <div style="flex:1;">
+            <h2>{{ libro.titulo }}</h2>
+            <p>{{ libro.autor }}</p>
+            <!-- ...form de prestar... -->
+          </div>
+        </div>
     </div>
 </body>
 </html>

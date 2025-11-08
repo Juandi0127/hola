@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Biblioteca</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
@@ -12,61 +13,104 @@
             <h2>Administración Biblioteca</h2>
             <hr>
         </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-container" style="margin-bottom: 1em;">
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category or 'success' }}">{{ message }}</div>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
         <div class="form-section">
-            <h3>Agregar libro al stock</h3>
-            <form method="post">
-                <input type="text" name="titulo" placeholder="Título" required>
-                <input type="text" name="autor" placeholder="Autor" required>
-                <input type="number" name="stock" placeholder="Cantidad" min="1" required>
-                <label for="seccion">Sección:</label>
-                <input type="text" name="seccion" required>
-                <button type="submit">Agregar</button>
+            <h3>Subir Archivo a la Biblioteca Virtual</h3>
+            <form action="{{ url_for('admin_upload') }}" method="post" enctype="multipart/form-data">
+                <input type="text" name="titulo" placeholder="Título del documento" required>
+                <textarea name="descripcion" placeholder="Breve descripción del documento..." rows="3" required></textarea>
+                <input type="file" name="file" required>
+                <button type="submit">Subir Archivo</button>
             </form>
         </div>
+
         <div class="table-section">
-            <h3>Libros en stock</h3>
+            <h3>Gestionar Archivos de la Biblioteca Virtual</h3>
             <table>
-                <tr>
-                    <th>Título</th>
-                    <th>Autor</th>
-                    <th>Cantidad</th>
-                    <th>Sección</th>
-                </tr>
-                {% for libro in libros %}
-                <tr>
-                    <td>{{ libro['titulo'] }}</td>
-                    <td>{{ libro['autor'] }}</td>
-                    <td>{{ libro['stock'] }}</td>
-                    <td>{{ libro['seccion'] }}</td>
-                </tr>
-                {% endfor %}
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Descripción</th>
+                        <th style="width: 150px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in documentos_virtuales %}
+                    <tr>
+                        <td>{{ doc.titulo }}</td>
+                        <td>{{ doc.descripcion }}</td>
+                        <td class="actions-cell">
+                            <a href="{{ url_for('admin_edit_document', doc_id=doc.id) }}" class="btn btn-sm">Editar</a>
+                            <form action="{{ url_for('admin_delete_document', doc_id=doc.id) }}" method="POST" style="display:inline-block;">
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que quieres eliminar este documento? Esta acción no se puede deshacer.');">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3">No hay archivos en la biblioteca virtual.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
             </table>
         </div>
+
         <div class="table-section">
-            <h3>Préstamos activos</h3>
+            <h3>Préstamos Activos</h3>
             <table>
-                <tr>
-                    <th>Libro</th>
-                    <th>Nombre</th>
-                    <th>Correo</th>
-                    <th>Grado</th>
-                    <th>Curso</th>
-                    <th>Días restantes</th>
-                </tr>
-                {% for prestamo in prestamos %}
-                <tr>
-                    <td>{{ prestamo['libro'] }}</td>
-                    <td>{{ prestamo['nombre'] }}</td>
-                    <td>{{ prestamo['correo'] }}</td>
-                    <td>{{ prestamo['grado'] }}</td>
-                    <td>{{ prestamo['curso'] }}</td>
-                    <td>{{ prestamo['dias_restantes'] }}</td>
-                </tr>
-                {% endfor %}
+                <thead>
+                    <tr>
+                        <th>Libro</th>
+                        <th>Estudiante</th>
+                        <th>Correo</th>
+                        <th>Fecha Préstamo</th>
+                        <th>Días Restantes</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prestamo in prestamos_activos %}
+                    <tr class="{% if prestamo.dias_restantes is not none and prestamo.dias_restantes <= 0 %}overdue{% endif %}">
+                        <td>{{ prestamo.libro_titulo }}</td>
+                        <td>{{ prestamo.usuario_nombre }}</td>
+                        <td>{{ prestamo.usuario_correo }}</td>
+                        <td>{{ prestamo.fecha_prestamo.strftime('%Y-%m-%d') }}</td>
+                        <td>
+                            {% if prestamo.dias_restantes is not none and prestamo.dias_restantes > 0 %}
+                                {{ prestamo.dias_restantes }} día(s)
+                            {% elif prestamo.dias_restantes is not none %}
+                                <span class="status-overdue">Vencido</span>
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td>
+                            <form action="{{ url_for('marcar_devuelto', prestamo_id=prestamo.id) }}" method="POST">
+                                <button type="submit" class="btn btn-success btn-sm">Marcar como Devuelto</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6">No hay préstamos activos.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
             </table>
         </div>
+
         <div style="text-align:center; margin-top:20px;">
-            <a href="{{ url_for('dashboard') }}"><button>Volver</button></a>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Volver al Dashboard</a>
         </div>
     </div>
 </body>

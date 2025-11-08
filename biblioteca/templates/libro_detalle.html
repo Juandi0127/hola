@@ -74,6 +74,23 @@
             {% endif %}
         {% endwith %}
 
+        <div class="book-header" style="display:flex;gap:1rem;align-items:flex-start;">
+  <div class="cover" style="width:160px;">
+    {% if libro.portada_filename %}
+      <img src="{{ url_for('uploaded_file', filename=libro.portada_filename) }}" alt="Portada" style="width:100%; height:auto; object-fit:contain; border-radius:6px;">
+    {% else %}
+      <img src="{{ url_for('static', filename='images/placeholder_book.png') }}" alt="Sin portada" style="width:100%; height:auto; object-fit:contain; border-radius:6px;">
+    {% endif %}
+  </div>
+  <div class="meta">
+    <h1>{{ libro.titulo }}</h1>
+    <p><strong>Autor:</strong> {{ libro.autor }}</p>
+    <p><strong>Editorial:</strong> {{ libro.editorial }}</p>
+    <p><strong>Sección:</strong> {{ libro.seccion }}</p>
+    <p><strong>Código:</strong> {{ libro.codigo_libro }}</p>
+  </div>
+</div>
+
         <div class="book-detail-grid">
             <div class="book-info">
                 <h3>{{ libro.titulo }}</h3>

@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Biblioteca - Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@alpinejs/intersect@2.x.x/dist/intersect.min.js" defer></script>
     <style>
         .recommendations-grid {
             display: grid;
@@ -57,7 +63,6 @@
             font-weight: bold;
             margin-top: 0.5em;
         }
-        /* Style for the new search form */
         .search-form-extended {
             display: flex;
             gap: 1em;
@@ -65,7 +70,7 @@
             margin-bottom: 1em;
         }
         .search-form-extended input[type='text'] {
-            flex-grow: 1; /* Allows the text input to take up available space */
+            flex-grow: 1;
         }
         .search-form-extended select {
             padding: 0.6em 1em;
@@ -77,11 +82,9 @@
             cursor: pointer;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
-
         .search-form-extended select:hover {
             border-color: #888;
         }
-
         .search-form-extended select:focus {
             outline: none;
             border-color: var(--primary-color);
@@ -89,24 +92,49 @@
         }
         .search-form-extended button,
         .search-form-extended .btn-secondary {
-            flex-shrink: 0; /* Prevents these elements from shrinking */
+            flex-shrink: 0;
         }
+        .scroll-to-top-container {
+            position: fixed;
+            bottom: 2em;
+            right: 2em;
+            z-index: 1000;
+        }
+        .scroll-to-top-btn {
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.5em;
+            line-height: 1;
+            padding: 0;
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        .scroll-to-top-btn:hover {
+            transform: scale(1.1);
+        }
+        [x-cloak] { display: none !important; }
     </style>
 </head>
-<body>
+<body x-data="{ showScrollTop: false }" @scroll.window="showScrollTop = (window.pageYOffset > 400)">
     <div class="container">
-        <header class="header">
+        <header class="header animate__animated animate__fadeInDown">
             <h2>Biblioteca ENSDB</h2>
             <div class="user-profile">
                 <span>{{ correo }}</span>
                 <a href="{{ url_for('perfil') }}">
                     <img src="{{ url_for('static', filename='escudo.jpg') }}" alt="Perfil">
                 </a>
+                {% if page == 'biblioteca_virtual' %}
+                    <a href="{{ url_for('dashboard') }}" class="btn">Biblioteca</a>
+                {% else %}
+                    <a href="{{ url_for('biblioteca_virtual') }}" class="btn">Biblioteca Virtual</a>
+                {% endif %}
                 <a href="{{ url_for('logout') }}" class="btn btn-danger">Cerrar Sesión</a>
             </div>
         </header>
 
-        <form method="GET" action="{{ url_for('dashboard') }}" class="search-form-extended">
+        {% block content %}
+        <form method="GET" action="{{ url_for('dashboard') }}" class="search-form-extended animate__animated animate__fadeIn" style="animation-delay: 0.2s;">
             <input type="text" name="search" placeholder="Buscar por título, autor o código..." value="{{ search }}">
             <select name="seccion">
                 <option value="">Todas las Secciones</option>
@@ -121,7 +149,7 @@
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="flash-message flash-{{ category or 'success' }}">{{ message }}</div>
+                    <div class="flash-message flash-{{ category or 'success' }} animate__animated animate__fadeInUp">{{ message }}</div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
@@ -130,7 +158,9 @@
         {% if not search and not seccion_actual %}
         <div class="recommendations-grid">
             {% if libros_populares %}
-            <div class="recommendation-section">
+            <div class="recommendation-section"
+                x-data="{ show: false }" x-intersect:once="show = true"
+                :class="{ 'animate__animated animate__fadeInUp': show }">
                 <h3>🌟 Los Más Populares</h3>
                 <div class="reco-card-list">
                     {% for libro in libros_populares %}
@@ -145,7 +175,9 @@
             {% endif %}
 
             {% if libros_mejor_calificados %}
-            <div class="recommendation-section">
+            <div class="recommendation-section"
+                x-data="{ show: false }" x-intersect:once="show = true"
+                :class="{ 'animate__animated animate__fadeInUp': show, 'animate__delay-1s': show }">
                 <h3>❤️ Mejor Calificados</h3>
                 <div class="reco-card-list">
                     {% for libro in libros_mejor_calificados %}
@@ -164,7 +196,9 @@
         <!-- Book Listings -->
         {% if secciones_agrupadas %}
             {% for seccion, libros in secciones_agrupadas.items() %}
-                <div class="table-section">
+                <div class="table-section"
+                    x-data="{ show: false }" x-intersect:once="show = true"
+                    :class="{ 'animate__animated animate__fadeIn': show }">
                     <h3>{{ seccion }}</h3>
                     <table>
                         <thead>
@@ -180,12 +214,12 @@
                         <tbody>
                             {% for libro in libros %}
                             <tr>
-                                <td>{{ libro['codigo_libro'] }}</td>
-                                <td><a href="{{ url_for('libro_detalle', libro_id=libro.id) }}" class="book-title-link">{{ libro['titulo'] }}</a></td>
-                                <td>{{ libro['autor'] }}</td>
-                                <td>{{ libro['editorial'] }}</td>
-                                <td>{{ libro['stock'] }}</td>
-                                <td>
+                                <td data-label="Código">{{ libro['codigo_libro'] }}</td>
+                                <td data-label="Título"><a href="{{ url_for('libro_detalle', libro_id=libro.id) }}" class="book-title-link">{{ libro['titulo'] }}</a></td>
+                                <td data-label="Autor">{{ libro['autor'] }}</td>
+                                <td data-label="Editorial">{{ libro['editorial'] }}</td>
+                                <td data-label="Stock">{{ libro['stock'] }}</td>
+                                <td data-label="Acción">
                                     <a href="{{ url_for('prestar', libro_id=libro['id']) }}" class="btn btn-success">Solicitar Préstamo</a>
                                 </td>
                             </tr>
@@ -195,11 +229,40 @@
                 </div>
             {% endfor %}
         {% else %}
-             <div class="table-section">
+            <div class="table-section animate__animated animate__fadeIn">
                 <h3>Sin Resultados</h3>
                 <p>No hay libros disponibles que coincidan con tus filtros. Prueba a limpiar la búsqueda.</p>
             </div>
         {% endif %}
+
+        <!-- Sección: recientes de la biblioteca con portadas -->
+        <section class="section-recents">
+          <h3>Recientes en Biblioteca</h3>
+          <div class="doc-list">
+            {% for doc in recientes %}
+            <div class="doc-card">
+              <div class="cover-wrap" style="height:140px;overflow:hidden;text-align:center;margin-bottom:.5rem;">
+                {% if doc.cover_filename %}
+                  <img src="{{ url_for('uploaded_file', filename=doc.cover_filename) }}" alt="Portada" style="max-height:100%; max-width:100%; object-fit:contain;">
+                {% else %}
+                  <img src="{{ url_for('static', filename='images/placeholder_book.png') }}" alt="Sin portada" style="max-height:100%; max-width:100%; object-fit:contain;">
+                {% endif %}
+              </div>
+              <h4 style="margin:0 0 .5rem 0;font-size:0.95rem;">{{ doc.titulo }}</h4>
+              <a class="btn-anim" href="{{ url_for('biblioteca_virtual') }}">Ver Biblioteca</a>
+            </div>
+            {% endfor %}
+          </div>
+        </section>
+        {% endblock %}
+    </div>
+
+    <!-- Scroll to Top Button -->
+    <div x-show="showScrollTop" class="scroll-to-top-container" style="display: none;">
+        <button @click="window.scrollTo({top: 0, behavior: 'smooth'})" class="btn btn-primary scroll-to-top-btn animate__animated animate__fadeInUp">
+            &#8679;
+        </button>
     </div>
 </body>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </html>

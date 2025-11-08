@@ -41,6 +41,8 @@
             <h2>Panel de Administración</h2>
             <a href="{{ url_for('logout_admin') }}" class="btn btn-danger">Cerrar Sesión</a>
         </header>
+        {% block content %}
+        {% endblock %}
 
         <div class="admin-grid">
             <div class="admin-card">
@@ -62,6 +64,11 @@
                 <h3>Estadísticas Clave</h3>
                 <p>Visualizar datos sobre el uso de la biblioteca.</p>
                 <a href="{{ url_for('admin_estadisticas') }}" class="btn btn-secondary">Ver Estadísticas</a>
+            </div>
+            <div class="admin-card">
+                <h3>Biblioteca Virtual</h3>
+                <p>Añadir y gestionar documentos PDF.</p>
+                <a href="{{ url_for('admin_biblioteca_virtual') }}" class="btn">Gestionar Biblioteca Virtual</a>
             </div>
         </div>
     </div>

@@ -13,6 +13,10 @@
             <a href="{{ url_for('admin_libros') }}" class="btn btn-secondary">Cancelar y Volver</a>
         </header>
 
+        {% block content %}
+        <div style="margin-bottom:1rem;">
+          <a href="{{ url_for('admin_panel') }}" class="btn-anim" style="display:inline-flex;align-items:center;gap:.5rem;">← Volver al panel</a>
+        </div>
         <div class="form-container" style="max-width: 600px; margin: 2em auto;">
             <form method="post">
                 <label for="titulo">Título</label>
@@ -33,6 +37,7 @@
                 <button type="submit" class="btn" style="width:100%;">Guardar Cambios</button>
             </form>
         </div>
+        {% endblock %}
     </div>
 </body>
 </html>

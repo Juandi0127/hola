@@ -1,0 +1,36 @@
+{% extends 'dashboard.html' %}
+
+{% block content %}
+<div class="page-fade">
+  <h2>Biblioteca virtual</h2>
+
+  <!-- Buscador público: solo título opcional, curso y letra -->
+  <form class="search-form" method="get" action="{{ url_for('biblioteca_virtual') }}" style="display:flex;gap:.6rem;align-items:center;margin:0.75rem 0;">
+    <input id="doc-search" name="search" placeholder="Buscar por título..." value="{{ search|default('') }}" autocomplete="off" style="flex:1;padding:.55rem;border:1px solid #e6e9ef;border-radius:8px;">
+    <input name="curso" placeholder="Curso (ej. 10)" value="{{ curso|default('') }}" style="width:120px;padding:.5rem;border:1px solid #e6e9ef;border-radius:8px;">
+    <input name="letra" placeholder="Letra (ej. A)" value="{{ letra|default('') }}" maxlength="1" style="width:100px;padding:.5rem;border:1px solid #e6e9ef;border-radius:8px;text-transform:uppercase;">
+    <button class="btn-anim" type="submit" style="padding:.5rem .8rem;border-radius:8px;">Buscar</button>
+    {% if search or curso or letra %}
+      <a class="btn-anim" href="{{ url_for('biblioteca_virtual') }}" style="background:#f3f4f6;color:#0f172a;padding:.45rem .7rem;border-radius:8px;">Limpiar</a>
+    {% endif %}
+  </form>
+
+  <div class="doc-list" style="display:flex;flex-wrap:wrap;gap:1rem;">
+    {% for doc in documentos %}
+    <div class="doc-card" style="width:320px;padding:1rem;border-radius:10px;">
+      <h4 style="margin:0 0 .4rem 0;">{{ doc.titulo }}</h4>
+      <p class="muted" style="margin:0 0 .6rem 0;">{{ doc.descripcion or 'Sin descripción' }}</p>
+      <div style="display:flex;gap:.5rem;align-items:center;">
+        {% if doc.filename %}
+          <a class="btn-anim" href="{{ url_for('uploaded_file', filename=doc.filename) }}" target="_blank">Ver</a>
+          <a class="btn-anim" href="{{ url_for('uploaded_file', filename=doc.filename) }}" download>Descargar</a>
+        {% endif %}
+        <div style="margin-left:auto;font-size:.85rem;color:#64748b;">
+          {{ doc.curso or '' }}{% if doc.letra_from and doc.letra_to %} · {{ doc.letra_from }}-{{ doc.letra_to }}{% elif doc.letra %} · {{ doc.letra }}{% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

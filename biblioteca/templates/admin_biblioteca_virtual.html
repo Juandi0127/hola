@@ -1,0 +1,52 @@
+{% extends 'admin_panel.html' %}
+
+{% block content %}
+<div class="admin-header">
+  <div>{% include 'admin_back_button.html' %}</div>
+  <div>
+    <a href="{{ url_for('admin_biblioteca_virtual') }}" class="btn-anim" style="background:#eef2ff;border-radius:8px;padding:.45rem .7rem;">Nuevo documento</a>
+  </div>
+</div>
+
+<div class="card mb-4" style="padding:1rem;">
+  <form id="upload-form" method="post" enctype="multipart/form-data" class="upload-form">
+    <div style="display:flex;gap:.6rem;align-items:center;">
+      <input name="titulo" placeholder="Título" required style="flex:1;padding:.55rem;border:1px solid #e6e9ef;border-radius:8px;">
+      <input name="file" type="file" accept=".pdf" required>
+      <button class="btn-anim" type="submit">Subir</button>
+    </div>
+    <div style="margin-top:.6rem;display:flex;gap:.6rem;align-items:flex-start;">
+      <input name="curso" placeholder="Curso (ej. 10)" style="width:140px;padding:.5rem;border:1px solid #e6e9ef;border-radius:8px;">
+      <input name="letra_from" placeholder="Letra desde (A)" maxlength="1" style="width:120px;padding:.5rem;border:1px solid #e6e9ef;border-radius:8px;text-transform:uppercase;">
+      <input name="letra_to" placeholder="Letra hasta (E)" maxlength="1" style="width:120px;padding:.5rem;border:1px solid #e6e9ef;border-radius:8px;text-transform:uppercase;">
+      <div style="flex:1">
+        <textarea name="descripcion" placeholder="Descripción (opcional)" style="width:100%;padding:.5rem;border:1px solid #e6e9ef;border-radius:8px;"></textarea>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- lista existente (sin cambios funcionales) -->
+<div class="card">
+  {% if documentos %}
+    {% for doc in documentos %}
+      <div class="doc-row">
+        <div class="meta">
+          <div class="title">{{ doc.titulo }}</div>
+          <div class="desc">{{ doc.descripcion or '' }}</div>
+          <div style="font-size:.8rem;color:#94a3b8;margin-top:.35rem;">Subido: {{ doc.fecha_subida }} · {{ doc.curso or '' }}{% if doc.letra_from and doc.letra_to %} · {{ doc.letra_from }}-{{ doc.letra_to }}{% elif doc.letra %} · {{ doc.letra }}{% endif %}</div>
+        </div>
+        <div class="admin-actions">
+          <a class="btn-anim" href="{{ url_for('uploaded_file', filename=doc.filename) }}" target="_blank">Ver</a>
+          <a class="btn-anim" href="{{ url_for('admin_edit_biblioteca_virtual', doc_id=doc.id) }}">Editar</a>
+          <form method="post" action="{{ url_for('admin_delete_biblioteca_virtual', doc_id=doc.id) }}" onsubmit="return confirm('¿Eliminar este documento?');" style="display:inline;">
+            <button class="btn-anim btn-danger" type="submit">Eliminar</button>
+          </form>
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div style="padding:1rem;">No hay documentos subidos.</div>
+  {% endif %}
+</div>
+{% endblock %}

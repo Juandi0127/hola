@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Estadísticas de la biblioteca</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
@@ -54,6 +55,11 @@
         <div style="text-align:center; margin-top:20px;">
             <a href="{{ url_for('admin_panel') }}"><button>Volver al panel</button></a>
         </div>
+        {% block content %}
+        <div style="margin-bottom:1rem;">
+          <a href="{{ url_for('admin_panel') }}" class="btn-anim" style="display:inline-flex;align-items:center;gap:.5rem;">← Volver al panel</a>
+        </div>
+        {% endblock %}
     </div>
 </body>
 </html>
